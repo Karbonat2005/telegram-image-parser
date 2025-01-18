@@ -10,30 +10,24 @@ TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
 
 # Функция для получения изображений из Telegram-канала
 def fetch_telegram_posts():
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChatHistory'
-    chat_id = '@rndmcIub'  # Укажите username канала или его ID
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
     images = []
     offset = None
 
     while True:
-        params = {
-            'chat_id': chat_id,
-            'limit': 100,  # Максимум 100 сообщений за раз
-        }
-        if offset:
-            params['offset'] = offset
-
+        # Добавляем offset для получения всех сообщений
+        params = {'offset': offset} if offset else {}
         response = requests.get(url, params=params).json()
 
         if not response.get("result"):
             break  # Если нет новых сообщений, выходим
 
-        for message in response["result"]:
-            offset = message["message_id"]  # Обновляем offset для следующего запроса
+        for update in response["result"]:
+            offset = update["update_id"] + 1  # Обновляем offset для следующего запроса
 
             # Проверяем наличие фото в сообщении
-            if 'photo' in message:
-                photos = message['photo']
+            if 'channel_post' in update and 'photo' in update['channel_post']:
+                photos = update['channel_post']['photo']
                 largest_photo = photos[-1]  # Берём самое большое фото
                 file_id = largest_photo['file_id']
 
