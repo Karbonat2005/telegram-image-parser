@@ -8,10 +8,10 @@ app = Flask(__name__)
 # Ваш Telegram Bot Token
 TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
 
-# Функция для получения изображений из Telegram-канала
+# Функция для получения изображений и текста из Telegram-канала
 def fetch_telegram_posts():
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
-    images = []
+    posts = []  # Список для хранения изображений и текста
     response = requests.get(url).json()
 
     # Логируем ответ от Telegram API
@@ -30,24 +30,33 @@ def fetch_telegram_posts():
                 file_path = requests.get(file_url).json().get('result', {}).get('file_path', '')
                 if file_path:
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
-                    images.append(full_url)
 
-            if len(images) >= 4:  # Ограничиваемся 4 изображениями
+                    # Извлекаем текст до разделителя "|"
+                    text = update['channel_post'].get('text', '')
+                    if "|" in text:
+                        text = text.split("|")[0].strip()
+                    else:
+                        text = text.strip()
+
+                    # Сохраняем изображение и текст
+                    posts.append({'image': full_url, 'text': text})
+
+            if len(posts) >= 4:  # Ограничиваемся 4 постами
                 break
 
-    print("Collected images:", images)  # Логируем собранные URL изображений
-    return images
+    print("Collected posts:", posts)  # Логируем собранные посты
+    return posts
 
 # Главная страница
 @app.route('/')
 def home():
     return redirect('/iframe')
 
-# Рендеринг HTML-страницы с изображениями
+# Рендеринг HTML-страницы с изображениями и текстом
 @app.route('/iframe')
 def generate_iframe():
-    images = fetch_telegram_posts()
-    return render_template('iframe.html', images=images)
+    posts = fetch_telegram_posts()
+    return render_template('iframe.html', posts=posts)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
