@@ -48,6 +48,11 @@ def generate_iframe():
     images = fetch_telegram_posts()
     return render_template('iframe.html', images=images)
 
+@app.route('/debug')
+def debug():
+    response = fetch_telegram_posts()
+    return f"Response: {response}"
+    
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
     app.run(host='0.0.0.0', port=port, debug=True)
