@@ -35,5 +35,8 @@ def generate_iframe():
     images = fetch_telegram_posts()
     return render_template('iframe.html', images=images)
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
+    app.run(host='0.0.0.0', port=port, debug=True)
