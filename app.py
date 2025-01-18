@@ -38,10 +38,10 @@ def fetch_telegram_posts():
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
                     images.append(full_url)
 
-            if len(images) >= 5:  # Ограничиваемся 5 изображениями
+            if len(images) >= 4:  # Ограничиваемся 5 изображениями
                 break
 
-        if len(images) >= 5:
+        if len(images) >= 4:
             break
 
     print("Collected images:", images)  # Логируем собранные URL изображений
