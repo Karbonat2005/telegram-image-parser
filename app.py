@@ -48,10 +48,12 @@ def generate_iframe():
     images = fetch_telegram_posts()
     return render_template('iframe.html', images=images)
 
-@app.route('/debug')
-def debug():
-    response = fetch_telegram_posts()
-    return f"Response: {response}"
+@app.route('/telegram-debug')
+def telegram_debug():
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
+    response = requests.get(url).json()
+    return response  # Возвращает ответ Telegram API как текст
+
     
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
