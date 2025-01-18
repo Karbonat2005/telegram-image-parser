@@ -16,7 +16,7 @@
         }
         .gallery {
             display: flex;
-            flex-wrap: wrap;
+            overflow-x: auto; /* Горизонтальная прокрутка */
             gap: 15px;
             justify-content: center;
             background: transparent; /* Чёрный полупрозрачный фон */
@@ -24,6 +24,19 @@
             border-radius: 0px;
             box-shadow: none;
         }
+
+     .gallery::-webkit-scrollbar {
+            height: 8px; /* Высота скроллбара */
+        }
+        .gallery::-webkit-scrollbar-thumb {
+            background: transparent; /* Цвет полосы прокрутки */
+            border-radius: 4px;
+        }
+        .gallery::-webkit-scrollbar-track {
+            background: transparent; /* Цвет фона полосы прокрутки */
+        }
+
+        
         .gallery img {
             width: 250px; 
             height: 335px;
