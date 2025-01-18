@@ -13,13 +13,17 @@
             align-items: center;
             margin: 0;
             padding: 20px;
-            background: #f9f9f9;
+            background: transparent; /* Прозрачный фон */
         }
         .gallery {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.8); /* Лёгкий белый фон */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .gallery img {
             width: 200px;
@@ -27,20 +31,12 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .message {
-            color: #555;
-            font-size: 18px;
-            text-align: center;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
     <div class="gallery">
         {% for image in images %}
         <img src="{{ image }}" alt="Telegram Post Image">
-        {% else %}
-        <p class="message">No images found. Make sure the bot is added to the channel and there are messages with photos.</p>
         {% endfor %}
     </div>
 </body>

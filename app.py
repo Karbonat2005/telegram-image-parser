@@ -12,19 +12,13 @@ TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
 def fetch_telegram_posts():
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
     images = []
-    offset = None
+    response = requests.get(url).json()
 
-    while True:
-        # Добавляем offset для получения всех сообщений
-        params = {'offset': offset} if offset else {}
-        response = requests.get(url, params=params).json()
+    # Логируем ответ от Telegram API
+    print("Telegram API response:", response)
 
-        if not response.get("result"):
-            break  # Если нет новых сообщений, выходим
-
+    if response.get("result"):
         for update in response["result"]:
-            offset = update["update_id"] + 1  # Обновляем offset для следующего запроса
-
             # Проверяем наличие фото в сообщении
             if 'channel_post' in update and 'photo' in update['channel_post']:
                 photos = update['channel_post']['photo']
@@ -38,11 +32,8 @@ def fetch_telegram_posts():
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
                     images.append(full_url)
 
-            if len(images) >= 4:  # Ограничиваемся 5 изображениями
+            if len(images) >= 4:  # Ограничиваемся 4 изображениями
                 break
-
-        if len(images) >= 4:
-            break
 
     print("Collected images:", images)  # Логируем собранные URL изображений
     return images
