@@ -1,6 +1,7 @@
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -29,13 +30,16 @@ def fetch_telegram_posts():
                 break
     return images
 
+# Главная страница
+@app.route('/')
+def home():
+    return redirect('/iframe')
+
 # Рендеринг HTML-страницы с изображениями
 @app.route('/iframe')
 def generate_iframe():
     images = fetch_telegram_posts()
     return render_template('iframe.html', images=images)
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
