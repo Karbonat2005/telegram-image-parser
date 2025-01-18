@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, redirect
 import requests
 import os
@@ -32,8 +31,8 @@ def fetch_telegram_posts():
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
                     images.append(full_url)
 
-            if len(images) >= 5:  # Ограничиваемся 5 изображениями
-                break
+    # Ограничиваемся 5 изображениями
+    images = images[:5]
 
     print("Collected images:", images)  # Логируем собранные URL изображений
     return images
