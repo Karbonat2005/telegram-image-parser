@@ -13,16 +13,17 @@ def fetch_telegram_posts():
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
     response = requests.get(url).json()
 
-    # Логируем весь ответ от Telegram
+    # Логируем ответ от Telegram для отладки
     print("Telegram API response:", response)
 
     images = []
     if response.get("result"):
         for update in response["result"]:
-            print("Processing update:", update)  # Логируем каждое сообщение
-            if 'message' in update and 'photo' in update['message']:
-                photo = update['message']['photo'][-1]  # Берём самое большое фото
-                file_id = photo['file_id']
+            # Проверяем наличие фото в сообщении
+            if 'channel_post' in update and 'photo' in update['channel_post']:
+                photos = update['channel_post']['photo']
+                largest_photo = photos[-1]  # Берём самое большое фото
+                file_id = largest_photo['file_id']
 
                 # Получаем URL файла
                 file_url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getFile?file_id={file_id}'
@@ -48,13 +49,6 @@ def generate_iframe():
     images = fetch_telegram_posts()
     return render_template('iframe.html', images=images)
 
-@app.route('/telegram-debug')
-def telegram_debug():
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
-    response = requests.get(url).json()
-    return response  # Возвращает ответ Telegram API как текст
-
-    
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
     app.run(host='0.0.0.0', port=port, debug=True)
