@@ -27,12 +27,20 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        .message {
+            color: #555;
+            font-size: 18px;
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="gallery">
         {% for image in images %}
         <img src="{{ image }}" alt="Telegram Post Image">
+        {% else %}
+        <p class="message">No images found. Make sure the bot is added to the channel and there are messages with photos.</p>
         {% endfor %}
     </div>
 </body>
