@@ -41,8 +41,9 @@ def fetch_telegram_posts():
                     # Сохраняем изображение и текст
                     posts.append({'image': full_url, 'text': text})
 
-            if len(posts) >= 4:  # Ограничиваемся 4 постами
-                break
+                    # Удаляем самую старую запись, если их больше 4
+                    if len(posts) > 4:
+                        posts.pop(0)
 
     print("Collected posts:", posts)  # Логируем собранные посты
     return posts
