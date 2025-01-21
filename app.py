@@ -14,17 +14,18 @@ stored_posts = []  # Глобальный список для сохранени
 # Функция для получения изображений и текста из Telegram-канала
 def fetch_telegram_posts():
     global stored_posts  # Используем глобальную переменную для сохранения старых постов
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
+    chat_id = '@rndmcIub'  # Укажите username вашего Telegram-канала
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChatHistory'
     posts = stored_posts.copy()  # Создаём копию текущего состояния
 
-    response = requests.get(url).json()
+    response = requests.get(url, params={'chat_id': chat_id, 'limit': 10}).json()
     print("Telegram API response:", response)  # Логируем ответ от Telegram API
 
     if response.get("result"):
-        for update in response["result"]:
+        for message in response["result"]:
             # Проверяем наличие фото в сообщении
-            if 'channel_post' in update and 'photo' in update['channel_post']:
-                photos = update['channel_post']['photo']
+            if 'photo' in message:
+                photos = message['photo']
                 largest_photo = photos[-1]  # Берём самое большое фото
                 file_id = largest_photo['file_id']
 
@@ -34,16 +35,9 @@ def fetch_telegram_posts():
                 if file_path:
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
 
-                    # Извлекаем текст до разделителя "|"
-                    text = update['channel_post'].get('text', '')
-                    if "|" in text:
-                        text = text.split("|")[0].strip()
-                    else:
-                        text = text.strip()
-
                     # Проверяем, есть ли это изображение уже в списке
                     if not any(post['image'] == full_url for post in posts):
-                        posts.append({'image': full_url, 'text': text})
+                        posts.append({'image': full_url, 'text': ''})  # Текст можно дополнить
 
                         # Удаляем самое старое сообщение, если их больше 4
                         if len(posts) > 4:
