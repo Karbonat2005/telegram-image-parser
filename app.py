@@ -8,14 +8,17 @@ app = Flask(__name__)
 # Ваш Telegram Bot Token
 TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
 
+# Переменная для хранения сообщений в памяти
+stored_posts = []  # Глобальный список для сохранения всех сообщений
+
 # Функция для получения изображений и текста из Telegram-канала
 def fetch_telegram_posts():
+    global stored_posts  # Используем глобальную переменную для сохранения старых постов
     url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
-    posts = []  # Список для хранения изображений и текста
-    response = requests.get(url).json()
+    posts = stored_posts.copy()  # Создаём копию текущего состояния
 
-    # Логируем ответ от Telegram API
-    print("Telegram API response:", response)
+    response = requests.get(url).json()
+    print("Telegram API response:", response)  # Логируем ответ от Telegram API
 
     if response.get("result"):
         for update in response["result"]:
@@ -38,14 +41,16 @@ def fetch_telegram_posts():
                     else:
                         text = text.strip()
 
-                    # Сохраняем изображение и текст
-                    posts.append({'image': full_url, 'text': text})
+                    # Проверяем, есть ли это изображение уже в списке
+                    if not any(post['image'] == full_url for post in posts):
+                        posts.append({'image': full_url, 'text': text})
 
-                    # Удаляем самую старую запись, если их больше 4
-                    if len(posts) > 4:
-                        posts.pop(0)
+                        # Удаляем самое старое сообщение, если их больше 4
+                        if len(posts) > 4:
+                            posts.pop(0)
 
-    print("Collected posts:", posts)  # Логируем собранные посты
+    stored_posts = posts  # Сохраняем обновлённый список
+    print("Updated stored posts:", stored_posts)  # Логируем итоговый список постов
     return posts
 
 # Главная страница
