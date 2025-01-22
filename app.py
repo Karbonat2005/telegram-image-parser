@@ -8,24 +8,19 @@ app = Flask(__name__)
 # Ваш Telegram Bot Token
 TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
 
-# Переменная для хранения сообщений в памяти
-stored_posts = []  # Глобальный список для сохранения всех сообщений
+# Функция для получения изображений из 3 последних постов Telegram
+def fetch_latest_posts():
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
+    response = requests.get(url).json()
 
-# Функция для получения изображений и текста из Telegram-канала
-def fetch_telegram_posts():
-    global stored_posts  # Используем глобальную переменную для сохранения старых постов
-    chat_id = '@rndmcIub'  # Укажите username вашего Telegram-канала
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChatHistory'
-    posts = stored_posts.copy()  # Создаём копию текущего состояния
-
-    response = requests.get(url, params={'chat_id': chat_id, 'limit': 10}).json()
     print("Telegram API response:", response)  # Логируем ответ от Telegram API
+    posts = []  # Список для хранения картинок и текста
 
     if response.get("result"):
-        for message in response["result"]:
-            # Проверяем наличие фото в сообщении
-            if 'photo' in message:
-                photos = message['photo']
+        updates = response["result"][-3:]  # Берем последние 3 обновления
+        for update in updates:
+            if 'channel_post' in update and 'photo' in update['channel_post']:
+                photos = update['channel_post']['photo']
                 largest_photo = photos[-1]  # Берём самое большое фото
                 file_id = largest_photo['file_id']
 
@@ -34,17 +29,9 @@ def fetch_telegram_posts():
                 file_path = requests.get(file_url).json().get('result', {}).get('file_path', '')
                 if file_path:
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
+                    posts.append({'image': full_url, 'text': ''})  # Добавляем картинку и пустой текст
 
-                    # Проверяем, есть ли это изображение уже в списке
-                    if not any(post['image'] == full_url for post in posts):
-                        posts.append({'image': full_url, 'text': ''})  # Текст можно дополнить
-
-                        # Удаляем самое старое сообщение, если их больше 4
-                        if len(posts) > 4:
-                            posts.pop(0)
-
-    stored_posts = posts  # Сохраняем обновлённый список
-    print("Updated stored posts:", stored_posts)  # Логируем итоговый список постов
+    print("Collected posts:", posts)  # Логируем собранные посты
     return posts
 
 # Главная страница
@@ -52,10 +39,10 @@ def fetch_telegram_posts():
 def home():
     return redirect('/iframe')
 
-# Рендеринг HTML-страницы с изображениями и текстом
+# Рендеринг HTML-страницы с изображениями
 @app.route('/iframe')
 def generate_iframe():
-    posts = fetch_telegram_posts()
+    posts = fetch_latest_posts()
     return render_template('iframe.html', posts=posts)
 
 if __name__ == '__main__':
