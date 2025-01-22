@@ -25,23 +25,6 @@
             box-shadow: none;
         }
 
-        .gallery::-webkit-scrollbar {
-            height: 8px; /* Высота скроллбара */
-        }
-        .gallery::-webkit-scrollbar-thumb {
-            background: transparent; /* Цвет полосы прокрутки */
-            border-radius: 4px;
-        }
-        .gallery::-webkit-scrollbar-track {
-            background: transparent; /* Цвет фона полосы прокрутки */
-        }
-
-        .gallery-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         .gallery img {
             width: 250px; 
             height: 335px;
@@ -49,25 +32,17 @@
             box-shadow: none;
         }
 
-        .gallery-item p {
-            margin-top: 5px;
-            font-size: 20px; /* Размер текста в 5 раз больше */
-            text-align: center;
-            color: white; /* Белый текст */
-            background: rgba(0, 0, 0, 0.7); /* Чёрная полупрозрачная подложка */
-            padding: 10px 10px; /* Увеличенные отступы */
-            border-radius: 5px; /* Закруглённые углы */
+        .gallery a {
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-
     <div class="gallery">
         {% for post in posts %}
-        <div class="gallery-item">
+        <a href="{{ post.url }}" target="_blank" class="gallery-item">
             <img src="{{ post.image }}" alt="Telegram Post Image">
-   
-        </div>
+        </a>
         {% endfor %}
     </div>
 </body>
