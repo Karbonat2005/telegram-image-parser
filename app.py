@@ -7,23 +7,24 @@ app = Flask(__name__)
 
 # Ваш Telegram Bot Token
 TELEGRAM_BOT_TOKEN = '7152667196:AAGxc2RtlH9dKc9Q1pg1J1kLU4M-4kS0OUc'
+CHAT_ID = '-1001812628545'  # ID Telegram-канала
 
-# Функция для получения изображений и ссылок на посты Telegram
+# Функция для получения изображений из 3 последних постов
 def fetch_latest_posts():
-    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates'
-    response = requests.get(url).json()
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChatHistory'
+    response = requests.get(url, params={'chat_id': CHAT_ID, 'limit': 10}).json()
 
-    print("Telegram API response:", response)  # Логируем ответ от Telegram API
-    posts = []  # Список для хранения картинок, текста и ссылок
+    print("Telegram API response:", response)  # Логируем ответ
+    posts = []
 
     if response.get("result"):
-        updates = response["result"][-3:]  # Берем последние 3 обновления
-        for update in updates:
-            if 'channel_post' in update and 'photo' in update['channel_post']:
-                photos = update['channel_post']['photo']
-                largest_photo = photos[-1]  # Берём самое большое фото
+        messages = response["result"][-3:]  # Берем последние 3 сообщения
+        for message in messages:
+            if 'photo' in message:
+                photos = message['photo']
+                largest_photo = photos[-1]  # Самое большое фото
                 file_id = largest_photo['file_id']
-                message_id = update['channel_post']['message_id']  # ID сообщения
+                message_id = message['message_id']  # ID сообщения
 
                 # Получаем URL файла
                 file_url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getFile?file_id={file_id}'
@@ -31,14 +32,13 @@ def fetch_latest_posts():
                 if file_path:
                     full_url = f'https://api.telegram.org/file/bot{TELEGRAM_BOT_TOKEN}/{file_path}'
 
-                    # Создаем ссылку на оригинальный пост
-                    chat_username = 'rndmcIub'  # Укажите username вашего Telegram-канала
+                    # Создаем ссылку на пост
+                    chat_username = 'rndmcIub'  # Username Telegram-канала
                     post_url = f'https://t.me/{chat_username}/{message_id}'
 
-                    # Добавляем пост с картинкой и ссылкой
-                    posts.append({'image': full_url, 'text': '', 'url': post_url})
+                    posts.append({'image': full_url, 'url': post_url})
 
-    print("Collected posts with links:", posts)  # Логируем собранные посты
+    print("Collected posts:", posts)  # Логируем посты
     return posts
 
 # Главная страница
@@ -46,12 +46,12 @@ def fetch_latest_posts():
 def home():
     return redirect('/iframe')
 
-# Рендеринг HTML-страницы с изображениями
+# Рендеринг HTML-страницы
 @app.route('/iframe')
 def generate_iframe():
     posts = fetch_latest_posts()
     return render_template('iframe.html', posts=posts)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Получаем порт из переменной окружения или используем 5000
+    port = int(os.environ.get("PORT", 5000))  # Используем порт 5000 или из окружения
     app.run(host='0.0.0.0', port=port, debug=True)
